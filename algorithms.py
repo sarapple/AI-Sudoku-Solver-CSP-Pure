@@ -1,37 +1,10 @@
 import queue as q
 from functools import reduce
+from operator import itemgetter
+
+from algorithm_helpers import AlgorithmHelpers
 
 class Algorithms:
-  @staticmethod
-  def get_puzzle_state_from_domains(puzzle_state, all_domains):
-    for i, domains_i in enumerate(all_domains):
-      if (int(puzzle_state[i]) == 0 and len(domains_i) == 1):
-        puzzle_state = puzzle_state[0:i] + str(list(domains_i)[0]) + puzzle_state[i + 1:]
-    
-    return puzzle_state 
-  @staticmethod
-  def get_all_domains(puzzle_state, client_defined_get_domains_for_index, client_defined_unassigned_value):
-    puzzle_state_length = len(puzzle_state)
-    puzzle_state_indexes = range(puzzle_state_length)
-    puzzle_state_domains = [(
-      client_defined_get_domains_for_index(puzzle_state, i) if puzzle_state[i] == client_defined_unassigned_value else set([int(puzzle_state[i])])
-    ) for i in puzzle_state_indexes]
-
-    return puzzle_state_domains
-
-  @staticmethod
-  def get_initial_arcs(puzzle_state, client_defined_get_neighbors_for_index):
-    all_arcs = [
-      [
-        (ref_index, neighbor_index)
-        for neighbor_index in client_defined_get_neighbors_for_index(puzzle_state, ref_index) if (neighbor_index != ref_index)
-      ]
-      for ref_index in range(len(puzzle_state))
-    ]
-    all_arcs.sort()
-
-    return set(reduce(lambda x, y: x + y, all_arcs))
-
   @staticmethod
   def ac3(
     initial_puzzle_state, # string of n characters
@@ -43,12 +16,12 @@ class Algorithms:
   ):
     puzzle_state = initial_puzzle_state
     # get the available domains for 81 squares
-    all_domains = Algorithms.get_all_domains(puzzle_state, client_defined_get_domains_for_index, client_defined_unassigned_value)
+    all_domains = AlgorithmHelpers.get_all_domains(puzzle_state, client_defined_get_domains_for_index, client_defined_unassigned_value)
     # update puzzle state where possible (domains with only one option) that haven't been set yet
-    puzzle_state = Algorithms.get_puzzle_state_from_domains(puzzle_state, all_domains)
+    puzzle_state = AlgorithmHelpers.get_puzzle_state_from_domains(puzzle_state, all_domains)
 
     queue = q.Queue()
-    initial_arcs = Algorithms.get_initial_arcs(puzzle_state, client_defined_get_neighbors_for_index)
+    initial_arcs = AlgorithmHelpers.get_initial_arcs(puzzle_state, client_defined_get_neighbors_for_index)
     for arc in initial_arcs: queue.put(arc)
 
     while (queue.empty() == False):
@@ -75,3 +48,35 @@ class Algorithms:
       return puzzle_state
     else:
       return None
+
+  @staticmethod
+  def backtracking_search(
+    puzzle_state,
+    client_defined_is_puzzle_complete,
+    client_defined_get_neighbors_for_index,
+    client_defined_get_domains_for_index,
+    client_defined_unassigned_value
+  ):
+    puzzle_state = AlgorithmHelpers.simplify_puzzle(puzzle_state, client_defined_get_domains_for_index, client_defined_unassigned_value)
+    if (client_defined_is_puzzle_complete(puzzle_state)):
+      return puzzle_state
+    
+    unassigned = AlgorithmHelpers.select_unassigned_variable(puzzle_state, client_defined_get_domains_for_index, client_defined_unassigned_value)
+    if (unassigned == None):
+      return None
+
+    (i, domains) = unassigned
+    if (domains == None):
+      return None
+
+    for (_, _, child_puzzle_state) in AlgorithmHelpers.get_ordered_domain_values(puzzle_state, i, client_defined_get_domains_for_index, client_defined_unassigned_value):
+      is_inference_safe = AlgorithmHelpers.inference(child_puzzle_state, i, client_defined_get_neighbors_for_index, client_defined_get_domains_for_index)
+
+      if (is_inference_safe):
+        found_solution = Algorithms.backtracking_search(child_puzzle_state, client_defined_is_puzzle_complete, client_defined_get_neighbors_for_index, client_defined_get_domains_for_index, client_defined_unassigned_value)
+
+        if (found_solution):
+          return found_solution
+ 
+    return None
+  

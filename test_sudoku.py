@@ -1,4 +1,5 @@
 from sudoku import Sudoku
+from algorithms import Algorithms
 
 def test_solve():
   puzzle = "000000000302540000050301070000000004409006005023054790000000050700810000080060009"
@@ -168,7 +169,7 @@ def test_get_all_arcs():
 def test_get_all_arc_indexes():
   puzzle = "123456789223456789323456789423456789523456789623456789723456789823456789923456789"
   index = 80
-  result = Sudoku.get_all_neighbor_indexes_for_index(puzzle, index)
+  result = Sudoku.get_neighbors_for_index(puzzle, index)
   assert result == set([
     60,
     61,
@@ -442,23 +443,6 @@ def test_ac3_4():
   puzzle = "000000000302540000050301070000000004409006005023054790000000050700810000080060009"
   result = Sudoku.ac3(puzzle)
   expected = None
-
-  assert result == expected
-
-def test_resolve_puzzle():
-  puzzle = (""
-    + "035009781"
-    + "682571493"
-    + "197034562"
-    + "826195347"
-    + "374682915"
-    + "951743628"
-    + "519326874"
-    + "248957136"
-    + "763418259"
-  ) 
-  result = Sudoku.resolve_puzzle(puzzle)
-  expected = "435269781682571493197834562826195347374682915951743628519326874248957136763418259"
 
   assert result == expected
 
