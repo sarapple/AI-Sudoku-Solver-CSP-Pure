@@ -175,6 +175,31 @@ class Sudoku:
     return ("0" not in puzzle_state)
 
   @staticmethod
+  def does_puzzle_follow_constraints(puzzle_state, unassigned_value):
+    for row in range(9):
+      indexes = Sudoku.get_horizontal_indexes(puzzle_state, row * 9)
+      indexes_unassigned = [i for i in indexes if puzzle_state[i] == unassigned_value]
+      remaining = Sudoku.get_remaining_domains_in_neighborhood(puzzle_state, indexes)
+      if (len(remaining) != len(indexes_unassigned)):
+        return False
+
+    for column in range(9):
+      indexes = Sudoku.get_vertical_indexes(puzzle_state, column)
+      indexes_unassigned = [i for i in indexes if puzzle_state[i] == unassigned_value]
+      remaining = Sudoku.get_remaining_domains_in_neighborhood(puzzle_state, indexes)
+      if (len(remaining) != len(indexes_unassigned)):
+        return False
+    
+    for subsection_start_index in [0, 3, 6, 27, 30, 33, 54, 57, 60]:
+      indexes = Sudoku.get_subsection_indexes(puzzle_state, subsection_start_index)
+      indexes_unassigned = [i for i in indexes if puzzle_state[i] == unassigned_value]
+      remaining = Sudoku.get_remaining_domains_in_neighborhood(puzzle_state, indexes)
+      if (len(remaining) != len(indexes_unassigned)):
+        return False
+
+    return True 
+
+  @staticmethod
   def ac3(initial_puzzle_state):
     if (len(initial_puzzle_state) != 81):
       raise Exception("Puzzle must be 81 characters long")
@@ -197,5 +222,6 @@ class Sudoku:
       client_defined_get_domains_for_index = Sudoku.get_domains_for_index,
       client_defined_get_neighbors_for_index = Sudoku.get_neighbors_for_index,
       client_defined_is_puzzle_complete = Sudoku.is_puzzle_complete,
-      client_defined_unassigned_value = "0"
+      client_defined_unassigned_value = "0",
+      client_defined_does_puzzle_follow_constraints = Sudoku.does_puzzle_follow_constraints,
     )

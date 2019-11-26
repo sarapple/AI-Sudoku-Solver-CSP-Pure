@@ -454,3 +454,34 @@ def test_backtracking_search():
   expected = "148697523372548961956321478567983214419276385823154796691432857735819642284765139"
 
   assert result == expected
+
+def test_solve_2():
+  puzzle = "040010068000000594080059000007003080304006000000100000050800703000000000800032009"
+  result = Sudoku.backtracking_search(puzzle)
+
+  assert result == "945317268173628594286459137527943681314286975698175342459861723732594816861732459"
+
+def test_does_follow_constraints():
+  puzzle_state = "945217368712368594683459172127593486394786215568124937259841723436975841871632659"
+  result = Sudoku.does_puzzle_follow_constraints(puzzle_state, "0")
+
+  assert result == False
+
+def test_does_follow_constraints_1():
+  puzzle_state = "945317268173628594286459137527943681314286975698175342459861723732594816861732459"
+  result = Sudoku.does_puzzle_follow_constraints(puzzle_state, "0")
+
+  assert result == True
+
+def test_does_follow_constraints_2():
+  puzzle_state = "794582136268931745315476982689715324432869571157243869821657493943128657576394218"
+  result = Sudoku.does_puzzle_follow_constraints(puzzle_state, "0")
+
+  assert result == True
+
+def test_backtracking_search_2():
+  puzzle_state = "094000130000000000000076002080010000032000000000200060000050400000008007006304008"
+  result = Sudoku.backtracking_search(puzzle_state)
+  expected = "794582136268931745315476982689715324432869571157243869821657493943128657576394218"
+
+  assert result == expected

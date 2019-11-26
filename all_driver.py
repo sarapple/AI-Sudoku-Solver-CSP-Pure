@@ -24,12 +24,19 @@ def main():
     if (results == None):
       solver = "BTS"
       results = Sudoku.solve(puzzle, solver)
+    print(solver, puzzle)
 
-    # write lines to output file
-    Reporter.write_output(
-      file_name = output_csv_file_name,
-      content = " ".join([results, solver]) + "\n",
-    )
+    if (results == None):
+      Reporter.write_output(
+        file_name = output_csv_file_name,
+        content = "\n",
+      )
+    else:
+      # write lines to output file
+      Reporter.write_output(
+        file_name = output_csv_file_name,
+        content = " ".join([results, solver]) + "\n",
+      )
 
 if __name__ == '__main__':
     main()

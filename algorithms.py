@@ -12,7 +12,7 @@ class Algorithms:
     client_defined_get_domains_for_index, # given a puzzle state and an index, should return the domains for that index
     client_defined_get_neighbors_for_index, # given a puzzle state and an index, should return the neighbor indexes for that index
     client_defined_is_puzzle_complete, # given the puzzle, is it complete? Should return True/False
-    client_defined_unassigned_value # unassigned value should be given this key
+    client_defined_unassigned_value, # unassigned value should be given this key
   ):
     puzzle_state = initial_puzzle_state
     # get the available domains for 81 squares
@@ -34,7 +34,7 @@ class Algorithms:
       elif (len(revised_domains_i) == 1): # found a way to minimize to 1 domain! This is the correct answer so update the puzzle.
         domain_as_string = str(list(revised_domains_i)[0])
         puzzle_state = puzzle_state[0:i] + domain_as_string + puzzle_state[i+1:]
-  
+      
       # domains have been revised for i, add back (neighbors, i) to queue to check arc consistency
       if (is_i_domains_revised == True):
         neighbors = [
@@ -43,7 +43,7 @@ class Algorithms:
         ]
 
         for arc in neighbors: queue.put(arc)
-    
+
     if (client_defined_is_puzzle_complete(puzzle_state) == True):
       return puzzle_state
     else:
@@ -55,7 +55,8 @@ class Algorithms:
     client_defined_is_puzzle_complete,
     client_defined_get_neighbors_for_index,
     client_defined_get_domains_for_index,
-    client_defined_unassigned_value
+    client_defined_unassigned_value,
+    client_defined_does_puzzle_follow_constraints,
   ):
     puzzle_state = AlgorithmHelpers.simplify_puzzle(puzzle_state, client_defined_get_domains_for_index, client_defined_unassigned_value)
     if (client_defined_is_puzzle_complete(puzzle_state)):
@@ -70,10 +71,22 @@ class Algorithms:
       return None
 
     for (_, _, child_puzzle_state) in AlgorithmHelpers.get_ordered_domain_values(puzzle_state, i, client_defined_get_domains_for_index, client_defined_unassigned_value):
+      does_follow_constraints = client_defined_does_puzzle_follow_constraints(child_puzzle_state, client_defined_unassigned_value)
+      
+      if (not does_follow_constraints):
+        continue
+
       is_inference_safe = AlgorithmHelpers.inference(child_puzzle_state, i, client_defined_get_neighbors_for_index, client_defined_get_domains_for_index)
 
       if (is_inference_safe):
-        found_solution = Algorithms.backtracking_search(child_puzzle_state, client_defined_is_puzzle_complete, client_defined_get_neighbors_for_index, client_defined_get_domains_for_index, client_defined_unassigned_value)
+        found_solution = Algorithms.backtracking_search(
+          child_puzzle_state,
+          client_defined_is_puzzle_complete,
+          client_defined_get_neighbors_for_index,
+          client_defined_get_domains_for_index,
+          client_defined_unassigned_value,
+          client_defined_does_puzzle_follow_constraints
+        )
 
         if (found_solution):
           return found_solution
